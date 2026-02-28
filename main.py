@@ -1,12 +1,13 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from database import user_collection
+from database import user_collection, client
 from models import UserCreate, UserLogin
 from auth import hash_password, verify_password
+from datetime import datetime, timezone
 
 app = FastAPI()
 
-# Allow browser clients to preflight and call the API during local dev
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -14,6 +15,33 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get("/")
+async def root():
+    return {"status": "ok", "message": "Backend is running"}
+
+
+@app.get("/health")
+async def health_check():
+    try:
+        client.admin.command("ping")
+        db_status = "connected"
+    except Exception as e:
+        db_status = f"error: {str(e)}"
+
+    return {
+        "status": "healthy" if db_status == "connected" else "unhealthy",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "database": db_status,
+    }
+
+
+@app.get("/users/count")
+async def users_count():
+    count = user_collection.count_documents({})
+    return {"user_count": count}
+
 
 @app.post("/register")
 async def register(user:UserCreate):
