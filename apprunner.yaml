@@ -1,12 +1,11 @@
 version: 1.0
-runtime: python3
+runtime: python311
 
 build:
   commands:
-    build:
-      - pip install -r requirements.txt
+    - pip install -r requirements.txt
 
 run:
-  command: gunicorn -k uvicorn.workers.UvicornWorker app:app
+  command: gunicorn -k uvicorn.workers.UvicornWorker app:app --bind 0.0.0.0:8000
   network:
     port: 8000
