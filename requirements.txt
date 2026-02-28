@@ -1,8 +1,9 @@
 fastapi
 uvicorn
-pydantic
+gunicorn
 pymongo
 python-dotenv
 bcrypt
 passlib
 email-validator
+pydantic[email]
